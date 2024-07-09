@@ -12,7 +12,8 @@ This is a simple digital timer application built using Python's Tkinter library.
 
 ## Screenshot
 
-![Digital Timer Screenshot](screenshot.png)
+![Digital Timer Screenshot](![image](https://github.com/adtyn-0/Digital-Timer/assets/165512407/eabec365-a499-461a-8a00-a170e6812031)
+)
 
 ## Installation
 
