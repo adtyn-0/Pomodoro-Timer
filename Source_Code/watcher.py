@@ -8,9 +8,8 @@ Distraction = ["youtube", "twitter",
                "instagram", "reddit", "discord", "tiktok"]
 focus_thread = None
 
+
 # Show Warning Overlay
-
-
 def show_warning():
     warning = ctk.CTk()
     warning.title("Stay Focused !!")

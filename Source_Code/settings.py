@@ -8,7 +8,8 @@ default_settings = {
     "short_break_minutes": 5,
     "long_break_minutes": 15,
     "cycles_before_long_break": 4,
-    "focus_mode_enabled": False
+    "focus_mode_enabled": False,
+    "alarm_sound": "alarm_classic.mp3"
 }
 
 

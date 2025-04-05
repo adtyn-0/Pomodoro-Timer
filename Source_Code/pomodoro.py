@@ -1,5 +1,6 @@
 # imports
 import customtkinter as ctk
+import os
 import settings
 import watcher
 import timer_logic
@@ -9,23 +10,29 @@ work_min = user_settings['work_minutes']
 # Main Window
 app = ctk.CTk()
 app.title("Pomodoro Timer")
-app.geometry("400x300")
+app.geometry("500x400")
 app.resizable(True, True)
 app.configure(fg_color="#406182")
 
 
-# Timer Labels
-timer_label = ctk.CTkLabel(app, text=f"{work_min: 02}:00", font=(
-    "Orbitron", 40, "bold"), text_color="white")
+#  Labels
+heading = ctk.CTkLabel(app, text="Pomodoro Timer",
+                       font=("Orbitron", 20), text_color="white")
 
+
+timer_label = ctk.CTkLabel(app, text=f"{work_min: 02}:00", font=(
+    "Orbitron", 48, "bold"), text_color="white")
+
+session_label = ctk.CTkLabel(app, text='Ready', font=(
+    "Orbitron", 24), text_color="white")
 
 start_button = ctk.CTkButton(
     app, text="Start", font=(
-        "Orbitron", 20, "bold"), fg_color="#23cb6c", hover_color="#0c9413", command=lambda: timer_logic.start_work(timer_label, app))
+        "Orbitron", 20, "bold"), fg_color="#23cb6c", hover_color="#0c9413", command=lambda: timer_logic.start_work(timer_label, session_label, app))
 
 
 reset_button = ctk.CTkButton(app, text="Reset", font=(
-    "Orbitron", 20, "bold"), fg_color="#8d8686", hover_color="#787171", command=lambda: timer_logic.reset_timer(timer_label, app)
+    "Orbitron", 20, "bold"), fg_color="#8d8686", hover_color="#787171", command=lambda: timer_logic.reset_timer(timer_label, session_label, app)
 )
 
 stop_button = ctk.CTkButton(app, text="Stop", font=("Orbitron", 20, "bold"), fg_color="#cb2323",  hover_color="#941313", command=lambda: timer_logic.stop_timer(app)
@@ -34,6 +41,9 @@ stop_button = ctk.CTkButton(app, text="Stop", font=("Orbitron", 20, "bold"), fg_
 
 # SETTINGS
 def settings_window():
+    root = os.path.dirname(os.path.dirname(__file__))
+    soundfiles = [f for f in os.listdir(os.path.join(
+        root, "assets/sounds")) if f.endswith(("mp3", "wav"))]
     setting_window = ctk.CTkToplevel()
     setting_window.title("Settings")
     setting_window.geometry('300x250')
@@ -68,6 +78,12 @@ def settings_window():
     cycle_entry.insert(0, str(user_settings["cycles_before_long_break"]))
     cycle_entry.pack(pady=5)
 
+    ctk.CTkLabel(scroll_frame, text="Alarm Sound:").pack(pady=5)
+    sound_selector = ctk.CTkOptionMenu(scroll_frame, values=soundfiles)
+    # fallback to first file
+    sound_selector.set(user_settings.get("alarm_sound", soundfiles[0]))
+    sound_selector.pack(pady=5)
+
     # Saving the changes
     def save_changes():
         new_settings = {
@@ -78,6 +94,7 @@ def settings_window():
 
         }
         new_settings["focus_mode_enabled"] = focus_mode_var.get()
+        new_settings["alarm_sound"] = sound_selector.get()
         settings.save_settings(new_settings)
         setting_window.destroy()
 
@@ -93,7 +110,7 @@ def settings_window():
 
     focus_mode_switch = ctk.CTkSwitch(
         scroll_frame,
-        text="Enable Full Focus Mode",
+        text="Enable Focus Mode",
         variable=focus_mode_var,
         command=toggle_focus
     )
@@ -105,17 +122,24 @@ settings_button = ctk.CTkButton(
 )
 
 
+# Layout
+
+app.grid_columnconfigure((0, 1, 2, 3), weight=1)
+app.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
+
+settings_button.grid(row=0, column=0, sticky='nw', padx=15, pady=15)
+heading.grid(row=0, column=0, columnspan=3, pady=(15, 5))
+session_label.grid(row=1, column=0, columnspan=3, pady=(0, 5))
+timer_label.grid(row=2, column=0, columnspan=3, pady=(10, 10))
+start_button.grid(row=3, column=0, padx=10, pady=(10, 5))
+stop_button.grid(row=3, column=1, padx=10, pady=(10, 5))
+reset_button.grid(row=3, column=2, padx=10, pady=(10, 5))
+
+
 def on_closing():
     settings.toggle_mode(False)
     app.destroy()
 
-
-# Layout
-timer_label.grid(row=1, column=1, padx=0, pady=0)
-start_button.grid(row=3, column=0, padx=0, pady=0)
-stop_button.grid(row=2, column=0, padx=0, pady=0)
-reset_button.grid(row=5, column=0, padx=0, pady=0)
-settings_button.grid(row=0, column=0, padx=0, pady=0)
 
 app.protocol("WM_DELETE_WINDOW", on_closing)  # Runs on window close
 
