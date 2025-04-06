@@ -13,7 +13,7 @@ focus_thread = None
 def show_warning():
     warning = ctk.CTk()
     warning.title("Stay Focused !!")
-    warning.geometry('350x200')
+    warning.geometry('500x400')
     warning.resizable(False, False)
 
     label = ctk.CTkLabel(warning, text="You Opened a distracting site!!!\nStay Focused!!", font=(

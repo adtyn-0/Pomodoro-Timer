@@ -7,7 +7,6 @@ count_id = None
 cycle = 0
 
 
-# Countdown logic with safety checks
 def countdown(label, app, sec, on_complete):
     global count_id
     try:
@@ -15,7 +14,7 @@ def countdown(label, app, sec, on_complete):
             print("App or label no longer exists. Cancelling countdown.")
             return
     except:
-        return  # Widgets may have already been destroyed
+        return
 
     if sec >= 0:
         min_left = sec // 60
@@ -23,8 +22,7 @@ def countdown(label, app, sec, on_complete):
         try:
             label.configure(text=f"{min_left:02}:{sec_left:02}")
         except:
-            return  # Avoid crash if label was destroyed
-
+            return
         try:
             count_id = app.after(1000, countdown, label,
                                  app, sec - 1, on_complete)
@@ -39,39 +37,55 @@ def countdown(label, app, sec, on_complete):
             pass
 
 
-# Start Work Session
-def start_work(label, session_label, app):
+def start_work(label, session_label, update_cat, app):
     global cycle
-    stop_timer(app)  # Cancel previous countdown if any
+    stop_timer(app)
     cycle += 1
     user_settings = settings.load_settings()
     work_min = user_settings["work_minutes"]
+    update_cat("work")
     print(f"Starting work session {cycle}")
     session_label.configure(text=f"Work Session: {cycle}")
     countdown(label, app, work_min * 60,
-              lambda: [play_alarm(), start_break(label, session_label, app)])
+              lambda: next_phase("work", label, session_label, update_cat, app))
 
 
-# Start Break
-def start_break(label, session_label, app):
+def start_break(label, session_label, update_cat, app, long_break=False):
     user_settings = settings.load_settings()
-    cycle_before_long_break = user_settings["cycles_before_long_break"]
-    short_break = user_settings["short_break_minutes"]
-    long_break = user_settings["long_break_minutes"]
 
-    if cycle % cycle_before_long_break == 0:
-        print("Starting long break")
-        session_label.configure(text="Long Break Session")
-        countdown(label, app, long_break * 60,
-                  lambda: [play_alarm(), start_break(label, session_label, app)])
+    if long_break:
+        duration = user_settings["long_break_minutes"]
+        label_type = "Long Break"
+        cat_type = "long_break"
     else:
-        print("Starting short break")
-        session_label.configure(text="Short Break Session")
-        countdown(label, app, short_break * 60,
-                  lambda: [play_alarm(), start_break(label, session_label, app)])
+        duration = user_settings["short_break_minutes"]
+        label_type = "Short Break"
+        cat_type = "short_break"
+
+    print(f"Starting {label_type.lower()}")
+    session_label.configure(text=f"{label_type} Session")
+    update_cat(cat_type)
+    countdown(label, app, duration * 60,
+              lambda: next_phase("break", label, session_label, update_cat, app))
 
 
-# Stop Timer
+def next_phase(last_session, label, session_label, update_cat, app):
+    play_alarm()
+    user_settings = settings.load_settings()
+    global cycle
+
+    if last_session == "work":
+        # Finished a work session
+        if cycle % user_settings["cycles_before_long_break"] == 0:
+            start_break(label, session_label, update_cat, app, long_break=True)
+        else:
+            start_break(label, session_label, update_cat,
+                        app, long_break=False)
+    else:
+        # Finished any break → go back to work
+        start_work(label, session_label, update_cat, app)
+
+
 def stop_timer(app):
     global count_id
     if count_id:
@@ -79,11 +93,10 @@ def stop_timer(app):
             app.after_cancel(count_id)
             print("Timer stopped.")
         except:
-            print("Failed to cancel timer (maybe app is closing).")
+            print("Failed to cancel timer.")
         count_id = None
 
 
-# Reset Timer
 def reset_timer(label, session_label, app):
     global cycle
     stop_timer(app)
@@ -97,17 +110,12 @@ def reset_timer(label, session_label, app):
         pass
     print("Timer reset.")
 
-# Add Sounds
-
 
 def play_alarm():
     def play():
-        # dynamically find root path
         root = os.path.dirname(os.path.dirname(__file__))
-
         user_settings = settings.load_settings()
         soundfile = user_settings.get("alarm_sound", "alarm_classic.mp3")
-        # attach assets folder to root path
         alarm_path = os.path.join(root, "assets/sounds", soundfile)
         playsound(alarm_path)
     threading.Thread(target=play, daemon=True).start()
