@@ -1,10 +1,16 @@
 import customtkinter as ctk
-import settings
+from Source_Code import settings
 import os
+import sys
 from PIL import Image, ImageSequence
-from customtkinter import CTkImage
 
-cat_frames = {}  # Loaded dynamically below
+cat_frames = {}
+
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(__file__), '..', relative_path)
 
 
 def apply_appearance_mode():
@@ -15,24 +21,20 @@ def apply_appearance_mode():
 
 def apply_theme_color(app, session_type):
     theme_colors = {
-        "work": "#e05b46",         # reddish-orange for work
-        "short_break": "#70c1b3",  # mint green for short break
-        "long_break": "#247ba0"    # ocean blue for long break
+        "work": "#e05b46",
+        "short_break": "#70c1b3",
+        "long_break": "#247ba0"
     }
-    color = theme_colors.get(session_type, "#171f27")  # default fallback
+    color = theme_colors.get(session_type, "#171f27")
     app.configure(fg_color=color)
 
 
 def apply_initial_theme(app):
-    app.configure(fg_color="#09abcb")  # fallback or idle color
+    app.configure(fg_color="#09abcb")
 
 
-# Load images once and reuse them
 def load_cat_images():
     global cat_frames
-    base_path = os.path.join(os.path.dirname(
-        os.path.dirname(__file__)), "assets", "images")
-
     CAT_SIZE_DEFAULT = (150, 150)
     CAT_SIZE_SLEEP = (180, 100)
 
@@ -41,9 +43,9 @@ def load_cat_images():
         return [img.copy().resize(size, Image.Resampling.LANCZOS) for img in ImageSequence.Iterator(img)]
 
     cat_frames = {
-        "work": load_gif(os.path.join(base_path, "pixel-cat-walk.gif"), CAT_SIZE_DEFAULT),
-        "short_break": load_gif(os.path.join(base_path, "pixel-cat.gif"), CAT_SIZE_DEFAULT),
-        "long_break": load_gif(os.path.join(base_path, "pixel-cat-sleep.gif"), CAT_SIZE_SLEEP),
+        "work": load_gif(resource_path("assets/images/pixel-cat-walk.gif"), CAT_SIZE_DEFAULT),
+        "short_break": load_gif(resource_path("assets/images/pixel-cat.gif"), CAT_SIZE_DEFAULT),
+        "long_break": load_gif(resource_path("assets/images/pixel-cat-sleep.gif"), CAT_SIZE_SLEEP),
     }
 
 

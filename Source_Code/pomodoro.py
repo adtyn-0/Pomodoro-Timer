@@ -1,10 +1,7 @@
 # imports
 import customtkinter as ctk
 import os
-import settings
-import watcher
-import timer_logic
-import theme
+from Source_Code import settings, timer_logic, watcher, theme
 from PIL import ImageTk
 from customtkinter import CTkImage
 

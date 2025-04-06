@@ -1,5 +1,5 @@
 import time
-import settings
+from Source_Code import settings, timer_logic, watcher, theme
 import customtkinter as ctk
 import threading
 import pyautogui

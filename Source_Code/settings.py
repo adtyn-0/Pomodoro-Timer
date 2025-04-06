@@ -1,6 +1,6 @@
 import os
 import json
-
+from Source_Code import settings, timer_logic, watcher, theme
 settings_file = "settings.json"
 
 default_settings = {

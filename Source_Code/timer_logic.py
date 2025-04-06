@@ -1,10 +1,19 @@
-import settings
+from Source_Code import settings, timer_logic, watcher, theme
 import os
+import sys
 from playsound3 import playsound
 import threading
 
 count_id = None
 cycle = 0
+
+# for pyinstaller
+
+
+def resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.dirname(__file__), '..', relative_path)
 
 
 def countdown(label, app, sec, on_complete):
@@ -75,14 +84,12 @@ def next_phase(last_session, label, session_label, update_cat, app):
     global cycle
 
     if last_session == "work":
-        # Finished a work session
         if cycle % user_settings["cycles_before_long_break"] == 0:
             start_break(label, session_label, update_cat, app, long_break=True)
         else:
             start_break(label, session_label, update_cat,
                         app, long_break=False)
     else:
-        # Finished any break → go back to work
         start_work(label, session_label, update_cat, app)
 
 
@@ -113,9 +120,9 @@ def reset_timer(label, session_label, app):
 
 def play_alarm():
     def play():
-        root = os.path.dirname(os.path.dirname(__file__))
         user_settings = settings.load_settings()
         soundfile = user_settings.get("alarm_sound", "alarm_classic.mp3")
-        alarm_path = os.path.join(root, "assets/sounds", soundfile)
+        alarm_path = resource_path(os.path.join("assets/sounds", soundfile))
         playsound(alarm_path)
+
     threading.Thread(target=play, daemon=True).start()
