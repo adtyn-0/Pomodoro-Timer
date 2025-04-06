@@ -4,8 +4,15 @@ import customtkinter as ctk
 import threading
 import pyautogui
 
-Distraction = ["youtube", "twitter",
-               "instagram", "reddit", "discord", "tiktok"]
+Distraction = [
+    "youtube", "twitter", "instagram", "reddit", "discord", "tiktok",
+    "facebook", "netflix", "primevideo", "hulu", "hotstar", "pinterest",
+    "twitch", "telegram", "whatsapp", "snapchat", "linkedin", "tumblr",
+    "spotify", "quora", "roblox", "epicgames", "steam", "crunchyroll",
+    "bilibili", "imgur", "weheartit", "9gag", "vk", "zoom", "teams",
+    "kick", "messenger", "onlyfans", "skype"
+]
+
 focus_thread = None
 
 
